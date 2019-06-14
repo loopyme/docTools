@@ -106,7 +106,7 @@ if __name__ == '__main__':
     # produce the directory
     directory = directory_title + '\n'
     for t in titles_sorted:
-        directory += (t.count('.') - 1) * 4 * ' '
+        directory += (t.split(' ')[0].count('.') - 1) * 4 * ' '
         directory += '* [{}]({})\n'.format(t, links[t])
 
     # check and write to file

@@ -14,9 +14,10 @@ import os
 def title_to_link(file_name, title):
     """transfer the *title* in the *file_name* to relative link"""
     global root_path, result_path
-    dic = {'\n|\.|\\\\|\(|\)': '',
+    dic = {'\n|\.|\\\\|': '',
            '#+ ': '?id=_',
-           ' ': '-'}
+           ' |:': '-',
+           '\(.+?\)': ''}
     for pattern in dic.keys():
         title = re.sub(pattern, dic[pattern], title)
 
@@ -73,10 +74,10 @@ root_path = '../scikit-learn-doc-zh/docs/'
 result_path = '../scikit-learn-doc-zh/'
 
 # 目录标题（目录文件也将用此标题命名）
-directory_title = "# 1.监督学习"
+directory_title = "SUMMERY"
 
 # 有效标题的最大层数（超过该层数的标题将不会出现在目录里）
-max_title_level = 5
+max_title_level = 2
 
 
 # 文件名有效判断函数（当不想这个文件出现在目录中时,应return False）
@@ -84,7 +85,7 @@ def is_target_file(file_name):
     """check *file_name* if it is target"""
     if file_name.__contains__('.'):  # is not a directory
         file_name, file_type = file_name.split('.')[0:2]
-        if file_type == 'md' and file_name.isdigit() and 1 < int(file_name) < 19:
+        if file_type == 'md' and file_name.isdigit() and 1 < int(file_name) < 50 :
             return True
     return False
 

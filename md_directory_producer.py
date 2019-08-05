@@ -1,7 +1,7 @@
 # python3
 # -*- coding: utf-8 -*-
 # @File    : md_directory_producer.py
-# @Desc    : md文档的目录生成器
+# @Desc    : Directory producer for markdown
 # @Software: PyCharm
 # @Time    : 19-6-14 下午7:25
 # @Author  : Loopy

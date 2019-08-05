@@ -1,7 +1,7 @@
 # python3
 # -*- coding: utf-8 -*-
 # @File    : rst2md.py
-# @Desc    : rst & md 相互转化
+# @Desc    : rst & md converter
 # @Software: PyCharm
 # @Time    : 19-6-3 上午10:42
 # @Author  : Loopy

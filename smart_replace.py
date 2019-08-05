@@ -1,7 +1,7 @@
 # python3
 # -*- coding: utf-8 -*-
 # @File    : smart_replace.py
-# @Desc    : 寻找目标(match_pattern)字符串,对其进行调整
+# @Desc    : find match_pattern and replace it!
 # @Software: PyCharm
 # @Time    : 19-6-1 下午3:12
 # @Author  : Loopy

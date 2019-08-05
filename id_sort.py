@@ -1,7 +1,7 @@
 # python3
 # -*- coding: utf-8 -*-
 # @File    : id_sort.py.py
-# @Desc    :  用于给md里的贡献者按字母顺序排序
+# @Desc    : Alphabetize the list of contributors
 # @Project : rst2mdTools
 # @Time    : 7/24/19 4:51 PM
 # @Author  : Loopy

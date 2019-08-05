@@ -11,13 +11,13 @@
 import re
 import os
 
-if __name__ == '__main__':
-    with open('./contributors.md', 'r+') as f:
+if __name__ == "__main__":
+    with open("./contributors.md", "r+") as f:
         ori_md = f.read()
     ids = re.findall("(- \[.+?\]\(.+?\)|- \[.+?\]\(\))", ori_md)
     id_url = {}
     for i in ids:
-        i_name, i_url = i.split('](')
+        i_name, i_url = i.split("](")
         i_name = i_name[3:]
         i_url = i_url[:-1]
 
@@ -28,6 +28,6 @@ if __name__ == '__main__':
     sorted_md = ""
     for i in sorted(id_url):
         sorted_md += "- [{}]({})\n".format(i, id_url[i])
-    with open('./contributors.md', 'w') as f:
+    with open("./contributors.md", "w") as f:
         f.write(sorted_md)
-    print("DONE,number of contributors: "+str(len(id_url)))
+    print("DONE,number of contributors: " + str(len(id_url)))

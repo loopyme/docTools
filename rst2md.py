@@ -14,9 +14,9 @@ import requests
 def help_md_rst(from_file, to_file, data):
     """ rst & md 转化辅助函数 """
     response = requests.post(
-        url='http://c.docverter.com/convert',
+        url="http://c.docverter.com/convert",
         data=data,
-        files={'input_files[]': open(from_file, 'rb')}
+        files={"input_files[]": open(from_file, "rb")},
     )
 
     if response.ok:
@@ -25,7 +25,7 @@ def help_md_rst(from_file, to_file, data):
             # auto backup
             to_file = from_file
             with open(to_file, "w") as f:
-                with open('bak_' + to_file, "w") as f_bac:
+                with open("bak_" + to_file, "w") as f_bac:
                     f_bac.write(f.read())
         else:
             with open(to_file, "w") as f:
@@ -35,14 +35,14 @@ def help_md_rst(from_file, to_file, data):
 
 
 def md_to_rst(from_file, to_file=None):
-    data = {'to': 'rst', 'from': 'markdown'}
+    data = {"to": "rst", "from": "markdown"}
     help_md_rst(from_file, to_file, data)
 
 
 def rst_to_md(from_file, to_file=None):
-    data = {'to': 'markdown', 'from': 'rst'}
+    data = {"to": "markdown", "from": "rst"}
     help_md_rst(from_file, to_file, data)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     md_to_rst("README.md", "README.rst")

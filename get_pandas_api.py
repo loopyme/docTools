@@ -26,7 +26,7 @@ def get_panda_apis():
     r = requests.get(
         "https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html"
     )
-    api_contents = re.findall(pattern, r.content.decode("utf-8"))[0]
+    api_contents = re.findall(pattern, r.content.decode("utf-8"))
     for i in api_contents:
         apis[i[1]] = "https://pandas.pydata.org/pandas-docs/stable/reference/" + i[0]
 
@@ -38,8 +38,8 @@ def get_modin_apis():
     modin_apis = ""
     pattern = "\| ``(.+?)``"
     with open(
-        "/home/x/Documents/git/modin/docs/UsingPandasonRay/dataframe_supported.rst",
-        "r+",
+            "/home/x/Documents/git/modin/docs/UsingPandasonRay/dataframe_supported.rst",
+            "r+",
     ) as f:
         text = f.read()
         f.seek(0)
@@ -56,10 +56,12 @@ def add_url(matched):
         )
         return "| `{}`_ ".format(modin_api)
     else:
+        print("WARNING: {}{} is not found".format("pandas.DataFrame.", modin_api))
         return matched.group()
 
 
 if __name__ == "__main__":
     pandas_apis = get_panda_apis()
     get_modin_apis()
+    
     print("DONE")

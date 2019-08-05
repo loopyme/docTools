@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @File    : id_sort.py.py
 # @Desc    : Alphabetize the list of contributors
-# @Project : rst2mdTools
+# @Project : docTools
 # @Time    : 7/24/19 4:51 PM
 # @Author  : Loopy
 # @Contact : peter@mail.loopy.tech

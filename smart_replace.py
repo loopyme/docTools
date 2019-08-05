@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 # @File    : smart_replace.py
 # @Desc    : find match_pattern and replace it!
-# @Software: PyCharm
+# @Project : docTools
 # @Time    : 19-6-1 下午3:12
 # @Author  : Loopy
-# @Contact : 57658689098a@gmail.com 
+# @Contact : peter@mail.loopy.tech
+# @License : CC BY-NC-SA 4.0 (subject to project license)
 
 import re
 import os

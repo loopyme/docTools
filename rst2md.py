@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 # @File    : rst2md.py
 # @Desc    : rst & md converter
-# @Software: PyCharm
+# @Project : docTools
 # @Time    : 19-6-3 上午10:42
 # @Author  : Loopy
-# @Contact : 57658689098a@gmail.com 
+# @Contact : peter@mail.loopy.tech
+# @License : CC BY-NC-SA 4.0 (subject to project license)
 
 import requests
 

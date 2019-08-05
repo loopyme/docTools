@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 # @File    : md_directory_producer.py
 # @Desc    : Directory producer for markdown
-# @Software: PyCharm
+# @Project : docTools
 # @Time    : 19-6-14 下午7:25
 # @Author  : Loopy
 # @Contact : peter@mail.loopy.tech
+# @License : CC BY-NC-SA 4.0 (subject to project license)
 
 import re
 import os

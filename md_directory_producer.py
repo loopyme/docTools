@@ -12,114 +12,228 @@ import re
 import os
 
 
-def title_to_link(file_name, title):
-    """transfer the *title* in the *file_name* to relative link"""
-    global root_path, result_path
-    dic = {"\n|\.|\\\\|": "", "#+ ": "?id=_", " |:": "-", "\(.+?\)": ""}
-    for pattern in dic.keys():
-        title = re.sub(pattern, dic[pattern], title)
+class DirectoryProducer:
 
-    # get the relpath from result_path to the processing file
-    path = os.path.relpath(
-        os.path.abspath(os.path.join(root_path, file_name)), result_path
-    )
+    manual_check = True
+    default_max_title_level = 3
+    default_root_path = "./"
+    default_result_path = "./"
 
-    id = path + title
-    return id.lower()
+    @classmethod
+    def config(
+        cls,
+        default_max_title_level=None,
+        manual_check=None,
+        default_result_path=None,
+        default_root_path=None,
+    ):
+        cls.default_max_title_level = (
+            default_max_title_level
+            if default_max_title_level is not None
+            else cls.default_max_title_level
+        )
+        cls.manual_check = (
+            manual_check if manual_check is not None else cls.manual_check
+        )
+        cls.default_root_path = (
+            default_root_path
+            if default_root_path is not None
+            else cls.default_root_path
+        )
+        cls.default_result_path = (
+            default_result_path
+            if default_result_path is not None
+            else cls.default_result_path
+        )
 
-
-def title_format(title):
-    """transfer the *title* to readable format"""
-    title = re.sub("#+? |\n", "", title)
-    title = re.sub("\\\\. ", " ", title)
-    return title
-
-
-def titles_sort(titles):
-    """sort the *titles* list"""
-    global max_title_level
-
-    # title to index
-    index_to_title_dic = {}
-    for t in titles:
-        t_split = t.split(" ")[0].split(".")
-        index = ""
-        if len(t_split) > max_title_level and t_split[max_title_level].isdigit():
-            # title level too low
-            pass
+    def __init__(
+        self,
+        result_filename,
+        is_target_file,
+        max_title_level=None,
+        result_title=None,
+        root_path=None,
+        result_path=None,
+        is_sorted = False,
+    ):
+        self.max_title_level = (
+            max_title_level
+            if max_title_level is not None
+            else self.default_max_title_level
+        )
+        self.root_path = root_path if root_path is not None else self.default_root_path
+        self.result_path = (
+            result_path if result_path is not None else self.default_result_path
+        )
+        self.result_title = (
+            result_title if result_title is not None else result_filename
+        )
+        self.result_filename = result_filename
+        self.is_sorted = is_sorted
+        if hasattr(is_target_file, "__call__"):
+            self.is_target_file = is_target_file
         else:
-            for i in range(max_title_level):
+            self.is_target_file = lambda filename: self.is_target_file_auto(
+                filename, *is_target_file
+            )
+
+    @staticmethod
+    def is_target_file_auto(file_name, limit_low, limit_high):
+        if file_name.__contains__("."):  # is not a directory
+            file_name, file_type = file_name.split(".")[0:2]
+            if (
+                file_type == "md"
+                and file_name.isdigit()
+                and limit_low <= int(file_name) < limit_high
+            ):
+                return True
+        return False
+
+    @staticmethod
+    def title_format(title):
+        """transfer the *title* to readable format"""
+        title = re.sub("#+? |\n", "", title)
+        title = re.sub("\\\\. ", " ", title)
+        return title
+
+    def title_to_link(self, file_name, title):
+        """transfer the *title* in the *file_name* to relative link"""
+        title_dic = {
+            r"\n|\.|\\\\|": r"",
+            r"#+ ": r"#",
+            r" |:": r"-",
+            r"\(.+?\)": r"",
+        }
+        for pattern in title_dic.keys():
+            title = re.sub(pattern, title_dic[pattern], title)
+
+        # get the relpath from result_path to the processing file
+        path = os.path.relpath(
+            os.path.abspath(os.path.join(self.root_path, file_name)), self.result_path
+        )
+
+        id = path + title
+        return id.lower()
+
+    def titles_sort(self, titles):
+        """sort the *titles* list"""
+
+        # title to index
+        index_to_title_dic = {}
+        for t in titles:
+            t_split = t.split(" ")[0].split(".")
+            index = ""
+            for i in range(self.max_title_level):
                 if len(t_split) > i and t_split[i].isdigit():
                     index += t_split[i].zfill(3)
                 else:
                     index += "000"
             index_to_title_dic[int(index)] = t
 
-    sorted_index = list(index_to_title_dic.keys())
-    sorted_index.sort()
-    res = []
+        sorted_index = list(index_to_title_dic.keys())
+        sorted_index.sort()
+        res = []
 
-    for i in sorted_index:
-        res.append((index_to_title_dic[i]))
-    return res
+        for i in sorted_index:
+            res.append((index_to_title_dic[i]))
+        return res
 
+    def generate(self):
+        # get all the titles, links and their levels
+        links = {}
+        levels = {}
+        for file in os.listdir(self.root_path):
+            if self.is_target_file(file):
+                with open(self.root_path + file, "r") as f:
+                    titles = re.findall("\n#+?.+\n|^#+?.+\n", f.read())
+                    for t in titles:
+                        t_level = t.count("#")
+                        if t_level < self.max_title_level:
+                            t_title = self.title_format(t)
+                            t_link = self.title_to_link(file, t)
 
-###########################################################################################################
-# parameters
+                            levels[t_title] = t_level
+                            links[t_title] = t_link
 
-# md文档所在位置
-root_path = "../scikit-learn-doc-zh/docs/"
+        # sort the titles
+        if self.is_sorted:
+            titles_sorted = links.keys()
+        else:
+            titles_sorted = self.titles_sort(links.keys())
 
-# 目录存放的目标位置（涉及相对位置的计算,生成后不可更改）
-result_path = "../scikit-learn-doc-zh/"
+        # produce the directory
+        directory = self.result_title + "\n"
+        for t in titles_sorted:
+            directory += (levels[t] - 1) * 4 * " "
+            directory += "* [{}]({})\n".format(t, links[t])
 
-# 目录标题（目录文件也将用此标题命名）
-directory_title = "SUMMERY"
-
-# 有效标题的最大层数（超过该层数的标题将不会出现在目录里）
-max_title_level = 2
-
-
-# 文件名有效判断函数（当不想这个文件出现在目录中时,应return False）
-def is_target_file(file_name):
-    """check *file_name* if it is target"""
-    if file_name.__contains__("."):  # is not a directory
-        file_name, file_type = file_name.split(".")[0:2]
-        if file_type == "md" and file_name.isdigit() and 1 < int(file_name) < 50:
-            return True
-    return False
-
-
-# 　主函数,无需修改
-if __name__ == "__main__":
-    # get all the titles and links
-    links = {}
-    for file in os.listdir(root_path):
-        if is_target_file(file):
-            with open(root_path + file, "r") as f:
-                titles = re.findall("\n#+?.+\n|^#+?.+\n", f.read())
-                for t in titles:
-                    links[title_format(t)] = title_to_link(file, t)
-
-    # sort the titles
-    titles_sorted = titles_sort(links.keys())
-
-    # produce the directory
-    directory = directory_title + "\n"
-    for t in titles_sorted:
-        directory += (t.split(" ")[0].count(".") - 1) * 4 * " "
-        directory += "* [{}]({})\n".format(t, links[t])
-
-    # check and write to file
-    print(
-        directory[:500]
-        + "\n"
-        + "=" * 66
-        + "\nPreview the first 500 chars of the directory here"
-    )
-    path = result_path + title_format(directory_title) + ".md"
-    check = input("Make sure the file will be written to: {}?\n(y/n)>>>".format(path))
-    if check in ["y", "Y", "yes"]:
+        # check and write to file
+        path = self.result_path + self.title_format(self.result_filename)
+        if self.manual_check:
+            print(
+                directory[:500]
+                + "\n"
+                + "=" * 66
+                + "\nPreview the first 500 chars of the directory here"
+            )
+            check = input(
+                "Make sure the file will be written to: {}?\n(y/n)>>>".format(path)
+            )
+            if check not in ["y", "Y", "yes"]:
+                return
         with open(path, "w") as f:
             f.write(directory)
             print("Write directory to:" + path)
+
+
+if __name__ == "__main__":
+    DirectoryProducer.config(
+        manual_check=False,
+        default_max_title_level=3,
+        default_result_path="./0.21.3/",
+        default_root_path="./0.21.3/",
+    )
+
+    job_list = [
+        {
+            "result_filename": "1.md",
+            "result_title": "# 1. 监督学习",
+            "is_target_file": (2, 19),
+        },
+        {
+            "result_filename": "19.md",
+            "result_title": "# 2. 无监督学习",
+            "is_target_file": (20, 29),
+        },
+        {
+            "result_filename": "29.md",
+            "result_title": "# 3. 模型选择和评估",
+            "is_target_file": (30, 35),
+        },
+        {
+            "result_filename": "35.md",
+            "result_title": "# 4. 检验",
+            "is_target_file": (36, 37),
+        },
+        {
+            "result_filename": "new_37.md",
+            "result_title": "# 5. 数据集转换",
+            "is_target_file": (38, 47),
+        },
+        # {
+        #     "result_filename": "50.md",
+        #     "result_title": "# scikit-learn 教程 0.21.x",
+        #     "is_target_file": (51, 62),
+        #     "is_sorted":True,
+        # },
+        # {
+        #     "result_filename": "new_52.md",
+        #     "result_title": "# 关于科学数据处理的统计学习教程",
+        #     "is_target_file": (53, 59),
+        #     "max_title_level":2,
+        #     "is_sorted":True,
+        # },
+    ]
+
+    for job in job_list:
+        DirectoryProducer(**job).generate()
